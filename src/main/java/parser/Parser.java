@@ -27,35 +27,21 @@ public abstract class Parser {
 	public Parser(Tokenizer t) {
 		tokenizer = t;
 	};
-
-	//	Parser methods
-	public void parse() {
-		tokens = new ArrayList<Token>();
-		while (!tokenizer.isEnd()) {
-			tokenizer.next();
-			tokens.add(tokenizer.getCurrentToken());
-		}
-	};
 	
-	//	Getter methods
-	public Tokenizer getTokenizer() {
-		return tokenizer;
-	};
+	/**
+	 * Parses the input and returns a list of tokens.
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public abstract List<Token> parse(String input);
 	
-	public List<Token> getTokens() {
-		if (tokens == null) {
-			parse();
-		}
-		return tokens;
-	};
-	
-	//	Setter methods
-	public void setTokenizer(Tokenizer t) {
-		tokenizer = t;
-	};
-	
-	public void setInput(String i) {
-		input = i;
-		tokenizer.input = i;
-	};
+	/**
+	 * Sets the input of the parser.
+	 * 
+	 * @param input
+	 */
+	public void setInput(String input) {
+		this.input = input;
+    };
 };

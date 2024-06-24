@@ -19,7 +19,7 @@ public class EuterpeanToken extends Token{
 
 	@Override
 	public String toString() {
-		return "<T: " + getType() + ", v: " + getValue() + ">";
+		return "<T: \"" + getType() + "\", v: \"" + getValue() + "\">";
 	}
 
 	@Override

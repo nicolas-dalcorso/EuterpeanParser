@@ -1,7 +1,6 @@
 package token;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 /**
  * A {@code Ruleset} is a set of rules that define the behavior of a {@token Tokenizer}.
  * 
@@ -36,5 +35,4 @@ public interface Ruleset {
 	 * @return the token regex of the ruleset
 	 */
 	public HashMap<String, String> getTokenRegex();
-
 };

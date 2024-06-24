@@ -1,92 +1,87 @@
 package token;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public abstract class Tokenizer {
-	protected static List<String> TOKEN_TYPES;
-	protected static Map<String, String> TOKEN_REGEX;
-	protected static Map<String, String> TOKEN_TYPES_MAP;
-	public String input;
-	public int index;
-	protected Token currentToken;
-	public String currentType;
-	public char currentValue;
+	protected String currentType;
+	protected char currentValue;
+	protected String currentToken;
+	protected int current_position;
+	protected String input;
 	
-	
-
+	/**
+	 * Creates a new {@code Tokenizer}.
+	 */
 	public Tokenizer() {
-		index = 0;
+		current_position = 0;
 		currentToken = null;
 		currentType = null;
 		currentValue = '\0';
+		setTokenTypes();
+		setTokenRegex();
 	};
 	
-	//	Initialization methods
-	public abstract void setTokenTypes();
-	
-	public abstract void setTokenRegex();
-	
-	
-	//	State methods
-	public void setState(Token t) {
-		setCurrentToken(t);
-		setCurrentType();
-		setCurrentValue();
-	};
-	
-	public boolean isEnd() {
-		return index >= input.length();
-	};
-	
-	public abstract void next();
-	
-	public void back() {
-		if (index > 0) {
-			index--;
-		} else {
-			index = 0;
-		};
-	};
-	
-	
-	//	Getter methods
-	public Token getCurrentToken() {
-		return currentToken;
-	};
-	
-	public String getCurrentType() {
-		return currentType;
-	};
-	
-	public char getCurrentValue() {
-		return currentValue;
-	};
-	
-	//	Setter methods
-	public abstract void setCurrentToken(Token t);
-	
-	public void setCurrentType() {
-		currentType = TOKEN_TYPES_MAP.get(currentToken.getType());
-	};
-	
-	public void setCurrentValue() {
-		currentValue = currentToken.getValue();
-	};
 
-
-	//	Program method
-	public ArrayList<EuterpeanToken> tokenize(String input) {
+	/**
+	 * Sets the input of the {@code Tokenizer}.
+	 * 
+	 * @param input
+	 */
+	public void setInput(String input) {
 		this.input = input;
-		List<Token> tokens = new ArrayList<Token>();
-		while (!isEnd()) {
-			next();
-			if (currentToken != null) {
-				tokens.add(currentToken);
-			}
-		}
-		return tokens;
+		current_position = 0;
 	};
 
+	/**
+	 * Sets the current state of the {@code Tokenizer}.
+	 * 
+	 * @param Token t
+	 */
+	public void setState(Token t) {
+		currentToken = t.getValue() + "";
+		currentType = t.getType();
+	};
+
+	/**
+	 * Matches the given token to a token type.
+	 * 
+	 * @param token
+	 * @return
+	 */
+	public abstract String match(String token);
+
+	/**
+	 * Decides if the current token shall be a repetition of a Note or a Rest
+	 * 
+	 * @param lastToken    the last token
+	 * @param currentToken the current token
+	 * @return the token type
+	 */
+	public abstract String match(String lastToken, String currentToken);
+
+	/**
+	 * Sets the token types of the {@code Tokenizer}.
+	 */
+	public abstract void setTokenTypes();
+
+	/**
+	 * Sets the token regex of the {@code Tokenizer}.
+	 */
+	public abstract void setTokenRegex();
+
+
+	/**
+     * Get the current state of the {@code Tokenizer}.
+     * 
+     * @return the current state of the {@code Tokenizer}
+     */
+    public abstract Token getState();
+    
+    /**
+     * Tokenize the input and returns a ArrayList<Token>.
+     * 
+     * @return the ArrayList<Token> of the input
+     * @throws Exception
+     */
+    public abstract ArrayList<Token> tokenize() throws Exception;
 }

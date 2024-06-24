@@ -3,52 +3,57 @@ package parser;
 import java.util.ArrayList;
 import token.*;
 
+/**
+ * A {@code EuterpeanParser} is the class responsible for getting the input from the System, parsing it and returning a list of {@code EuterpeanToken} objects.
+ * The tokens are obtained from the {@code EuterpeanTokenizer} class and then processed by the parser.
+ * Finally, the parser returns a list of tokens that can be used by the {@code NoteBuilder} class to build the {@code MusicString} object.
+ * 
+ * @see EuterpeanTokenizer
+ * @see EuterpeanToken
+ * @see NoteBuilder
+ * @author nrdc
+ * @version 1.0
+ * @since 1.0
+ */
 public class EuterpeanParser {
-	private EuterpeanTokenizer tokenizer;
-	private String input;
-	private ArrayList<EuterpeanToken> tokens;
+	private EuterpeanTokenizer 			tokenizer;
+	private String 						input;
+	private ArrayList<EuterpeanToken> 	tokens;
 
 	public EuterpeanParser() {
-		tokenizer = new EuterpeanTokenizer();
-        tokens = new ArrayList<EuterpeanToken>();
+		tokenizer 	= new EuterpeanTokenizer();
+        tokens 		= new ArrayList<EuterpeanToken>();
     };
     
-	public void parse(String input) {
-		this.input = input;
-		ArrayList<EuterpeanToken> tokenList = new ArrayList<EuterpeanToken>();
-		
-		//	First iteration with the tokenizer
-		tokenizer.setInput(input);
-		while (!tokenizer.isEnd()) {
-			tokenizer.next();
-			if (tokenizer.getCurrentToken() != null) {
-				tokenList.add((EuterpeanToken) tokenizer.getCurrentToken());
-			}
-		};
-		
-		//	Second iteration with the parser
-		for (int i = 0; i < tokenList.size(); i++) {
-			EuterpeanToken current_token = tokenList.get(i);
-			
-			//	Check if the token is a repeat note
-			if (current_token.getType().equals("REPEAT NOTE?")) {
-				if(i > 0) {
-                    EuterpeanToken previous_token = tokenList.get(i - 1);
-                    if (previous_token.getType().equals("NOTE")) {
-                        tokenList.set(i, new EuterpeanToken("NOTE", previous_token.getValue()));
-                    } else {
-                        tokenList.set(i, new EuterpeanToken("REST", current_token.getValue()));
-                    }
-				}	else {
-                    tokenList.set(i, new EuterpeanToken("REST", current_token.getValue()));
-				};
-			};
-			
-		
-		};
-		tokens = tokenList;
+    public EuterpeanParser(EuterpeanTokenizer t) {
+		tokenizer = t;
 	};
 	
+	/**
+	 * Parses the input and returns a list of tokens.
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public ArrayList<EuterpeanToken> parse(String input) {
+		this.setInput(input);
+		ArrayList<EuterpeanToken> euterpeanTokens 	= new ArrayList<EuterpeanToken>();
+		ArrayList<Token>					tokens 	= tokenizer.run(input);
+		
+		for (Token t : tokens) {
+			euterpeanTokens.add((EuterpeanToken) t);
+		}
+		
+		return euterpeanTokens;
+	};
+	
+	/**
+	 * Sets the input of the parser.
+	 * @param String input
+	 */
+	public void setInput(String input) {
+		this.input = input;
+	};
 	
 	//	Main method
 	public static void main(String[] args) {
