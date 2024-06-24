@@ -12,6 +12,10 @@ public class EuterpeanToken extends Token{
 	public EuterpeanToken() {
 		super();
 	}
+	
+	public EuterpeanToken(String type, String value) {		
+		super(type, value.charAt(0));
+	};
 
 	@Override
 	public String toString() {

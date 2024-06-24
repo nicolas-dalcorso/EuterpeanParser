@@ -28,7 +28,6 @@ public abstract class Tokenizer {
 	
 	public abstract void setTokenRegex();
 	
-	public abstract void setTokenTypesMap();
 	
 	//	State methods
 	public void setState(Token t) {
@@ -78,7 +77,7 @@ public abstract class Tokenizer {
 
 
 	//	Program method
-	public List<Token> tokenize(String input) {
+	public ArrayList<EuterpeanToken> tokenize(String input) {
 		this.input = input;
 		List<Token> tokens = new ArrayList<Token>();
 		while (!isEnd()) {

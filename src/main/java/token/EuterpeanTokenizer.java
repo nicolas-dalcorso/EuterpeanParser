@@ -5,185 +5,116 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class EuterpeanTokenizer extends Tokenizer{
-	private List<String> TOKEN_TYPES;
-	private HashMap<String, String> TOKEN_REGEX;
-	private HashMap<String, String> TOKEN_TYPES_MAP;
-	private Token currentToken;
-	private String currentType;
-	private char currentValue;
+	private ArrayList<EuterpeanToken> tokens;
+	private EuterpeanRuleset ruleset;
 	private String input;
-	private int index;
+	private int current_position;
+	private boolean is_end;
+	private HashMap<String, String> token_regex;
 	
 	
-	
-	public EuterpeanTokenizer() {
-		super();
-		setTokenTypes();
-		setTokenRegex();
-		setTokenTypesMap();
-	}
-
-	public void setTokenTypes() {
-		TOKEN_TYPES = new ArrayList<String>();
-		TOKEN_TYPES.add("NOTE");
-		TOKEN_TYPES.add("REPEAT NOTE?");
-		TOKEN_TYPES.add("REST");
-		TOKEN_TYPES.add("INCREASE VOLUME");
-		TOKEN_TYPES.add("DECREASE VOLUME");
-		TOKEN_TYPES.add("CHANGE INSTRUMENT");
-		TOKEN_TYPES.add("TEMPO");
-		TOKEN_TYPES.add("EOF");
-	}
-
-	public void setTokenRegex() {
-		TOKEN_REGEX = new HashMap<String, String>();
-		TOKEN_REGEX.put("NOTE", "[A-G]");
-		TOKEN_REGEX.put("REPEAT NOTE?", "[a-g]");
-		TOKEN_REGEX.put("INCREASE VOLUME", "\\.\\,");
-		TOKEN_REGEX.put("CHANGE INSTRUMENT", "\\!");
-		TOKEN_REGEX.put("WHITESPACE", "\\s+");
-		TOKEN_REGEX.put("REST", "[h-zH-Z]");
-		TOKEN_REGEX.put("EOF", "$");
-	}
-
-	public void setTokenTypesMap() {
-        TOKEN_TYPES_MAP = new HashMap<String, String>();
-        TOKEN_TYPES_MAP.put("A", "LA");
-        TOKEN_TYPES_MAP.put("B", "SI");
-        TOKEN_TYPES_MAP.put("C", "DO");
-        TOKEN_TYPES_MAP.put("D", "RE");
-        TOKEN_TYPES_MAP.put("E", "MI");
-        TOKEN_TYPES_MAP.put("F", "FA");
-        TOKEN_TYPES_MAP.put("G", "SOL");
-        TOKEN_TYPES_MAP.put("z", "REST");
-        TOKEN_TYPES_MAP.put(".", "INCREASE VOLUME");
-        TOKEN_TYPES_MAP.put(",", "DECREASE VOLUME");
-        TOKEN_TYPES_MAP.put("EOF", "EOF");
-	};
-
 	/**
-	 * Matches a char from the input to a token type
-	 * 
-	 * @param char c
-	 * @return String type
+	 * Creates a new {@code EuterpeanTokenizer}.
 	 */
-	public String matchType(char c) {
-		try {
-		for (String type : TOKEN_TYPES) {
-				String regex = TOKEN_REGEX.get(type);
-				if (String.valueOf(c).matches(regex)) {
-					return type;
-				}
-			}
-			
-			return "INVALID";
-		
-		} catch (Exception e) {
-			return "INVALID";
-		}
+	public EuterpeanTokenizer() {
+		ruleset = new EuterpeanRuleset();
+		tokens = new ArrayList<EuterpeanToken>();
+		current_position = 0;
+		is_end = false;
+	};
+
+	public void setInput(String input) {
+		this.input = input;
+		current_position = 0;
+		is_end = false;
 	};
 	
+	@Override
 	public void next() {
-		if (isEnd()) {
-			currentToken = new EuterpeanToken("EOF", '\0');
-			setCurrentType();
-			setCurrentValue();
+		if (current_position >= input.length()) {
+			is_end = true;
 			return;
 		}
-		char c = input.charAt(index);
-		if (String.valueOf(c).matches("\\s+")) {
-			currentToken = new EuterpeanToken("WHITESPACE", c);
-		}	else {
-				String type = matchType(c);
-	            if (type == "INVALID") {
-	                currentToken = new EuterpeanToken("INVALID", c);
-	            } 	else {
-	                	currentToken = new EuterpeanToken(type, c);
-	            	};
-	            	
-			};
-		
-		setCurrentType();
-		setCurrentValue();
-		index++;
-		return;
+
+		String remaining_input = input.substring(current_position);
+		String token_type = ruleset.getTokenType(remaining_input);
+		String token_value = ruleset.getTokenValue(remaining_input);
+		EuterpeanToken token = new EuterpeanToken(token_type, token_value);
+		tokens.add(token);
+		current_position += token_value.length();
 	};
 	
-	public void setCurrentType() {
-		currentType = currentToken.getType();
+	public String getTokenType(String value) {
+		return ruleset.getTokenType(value);
 	};
 	
-	public void setCurrentValue() {
-		currentValue = currentToken.getValue();
-	};
-	
-	public void setCurrentToken(Token t) {
-		currentToken = t;
-	};
-	
+	@Override
 	public Token getCurrentToken() {
-		return currentToken;
-	};
-	
-	public String getCurrentType() {
-		return currentType;
-	};
-	
-	public char getCurrentValue() {
-		return currentValue;
-	};
-	
-	public boolean isEnd() {
-		return index >= input.length();
-	};
-	
-	public void back() {
-		if (index > 0) {
-			index--;
+		if (tokens.size() > 0) {
+			return tokens.get(tokens.size() - 1);
 		} else {
-			index = 0;
-		};
+			return null;
+		}
 	};
 	
-	public void setInput(String i) {
-		input = i;
-		index = 0;
+	@Override
+	public boolean isEnd() {
+		return is_end;
 	};
 	
-	public String getInput() {
-		return input;
-	};
-	
-	public int getIndex() {
-		return index;
-	};
-	
-	public void setIndex(int i) {
-		index = i;
-	};
-	
-	//	Program
-	public List<Token> tokenize(String input) {
+	@Override
+	public ArrayList<EuterpeanToken> tokenize(String input) {
 		setInput(input);
-		List<Token> tokens = new ArrayList<Token>();
-		while (!isEnd()) {
+		while (!is_end) {
 			next();
-			if (currentToken != null) {
-				tokens.add(currentToken);
-			}
 		}
 		return tokens;
 	};
+	
+	public ArrayList<EuterpeanToken> getTokens() {
+		return tokens;
+	};
+	
+	public void reset() {
+		tokens.clear();
+		current_position = 0;
+		is_end = false;
+	};
+	
+	public void clear() {
+		tokens.clear();
+		input = "";
+		current_position = 0;
+		is_end = false;
+	};
+	
+	
 	
 
 
 	//	Main Method
 	public static void main(String[] args) {		
 		EuterpeanTokenizer t = new EuterpeanTokenizer();
-		String input = "Classificada como a maior iniciativa deste tipo já realizada no Rio Grande do Sul, ação reuniu cerca de 2 mil pessoas neste domingo para auxiliar moradores dos bairros Humaitá e Vila Farrapos. A região foi a mais atingida pela enchente de maio na Capital";
-		List<Token> tokens = t.tokenize(input);
+		String input = "Classificada como a maior iniciativa deste tipo, ou será?";
+		ArrayList<EuterpeanToken> tokens = t.tokenize(input);
 		for (Token token : tokens) {
 			System.out.println(token);
 		}
+	}
+
+	@Override
+	public void setTokenTypes() {
+		return;
+		
+	}
+
+	@Override
+	public void setTokenRegex() {
+		return;
+	}
+
+	@Override
+	public void setCurrentToken(Token t) {
+		return;
 	};
 };

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nrdclib</groupId>
   <artifactId>euterpean-parser</artifactId>
-  <version>1.0</version>
+  <version>0.0.1-SNAPSHOT</version>
   <name>Euterpean Parser</name>
   <description>Extended implementation of the NaiveParser module for the Euterpe project</description>
 </project>
